@@ -1,0 +1,17 @@
+---
+install_directory: /opt/nessus_agent
+
+#nessus_version: 8.3.1
+
+nessus_key: ''
+
+nessus_agent_host: cloud.tenable.com
+nessus_agent_port: 443
+
+proxy_host: "{{ proxy | urlsplit('hostname') }}"
+proxy_port: "{{ proxy | urlsplit('port') }}"
+
+nessus_agent_group: ""
+
+nessus_enabled: true
+nessus_remove: false

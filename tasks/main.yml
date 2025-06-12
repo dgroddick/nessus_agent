@@ -1,0 +1,100 @@
+---
+- name: Check is agent already installed
+  stat:
+    path: "{{ install_directory }}"
+  register: nessus_directory
+
+
+- name: Install Nessus agent.
+  block:
+
+  #- name: Check disk space in /opt before installing
+  #  shell: "df /opt | grep -v Filesystem | awk '{print $4}' | cut -d G -f1"
+  #  register: optspace
+  #  failed_when: "optspace.stdout|float < 1267880"
+
+  - name: RedHat 
+    include: RedHat.yml
+    when: ansible_facts['os_family'] == 'RedHat'
+
+  - name: Debian
+    include: Debian.yml
+    when: ansible_facts['os_family'] == 'Debian'
+
+  when:
+    - not nessus_directory.stat.exists
+    - nessus_enabled
+
+
+- name: Link nessus agent
+  block:
+
+  - name: Check agent is running
+    service:
+      name: nessusagent
+      state: started
+      enabled: yes
+
+  - name: Check agent link status.
+    command: /opt/nessus_agent/sbin/nessuscli agent status
+    ignore_errors: yes
+    register: nessus_link
+    changed_when: nessus_link.rc != 0
+
+  - name: Link nessus agent to tenable
+    command: /opt/nessus_agent/sbin/nessuscli agent link 
+            --key={{ nessus_key }} 
+            --host={{ nessus_agent_host }} 
+            --port={{ nessus_agent_port }} 
+            --proxy-host={{ proxy_host | default('proxy.une.edu.au', true)}} 
+            --proxy-port={{ proxy_port | default('8080', true) }} 
+            --groups="{{ nessus_agent_group }}"
+            --cloud
+    when: nessus_link is failed
+
+  when:
+    - nessus_enabled
+
+
+
+- name: Remove Nessus agent
+  block:
+
+  - name: Use nessuscli to unlink Tenable Nessus Agent.
+    command: "{{ install_directory }}/sbin/nessuscli agent unlink"
+    ignore_errors: yes
+
+  - name: Stop nessus service
+    service:
+      name: nessusagent 
+      state: stopped
+      enabled: no
+    become: yes
+
+  - name: Remove nessus package
+    yum:
+      name: NessusAgent
+      state: absent
+
+  - name: Remove directory
+    ansible.builtin.file:
+      path: "{{ install_directory }}"
+      state: absent
+  
+  when: nessus_remove
+
+
+- name: Disable nessus agent
+  block:
+    
+  - name: Unlink from tenable
+    command: "{{ install_directory }}/sbin/nessuscli agent unlink"
+    ignore_errors: yes
+  
+  - name: Stop nessus service
+    service:
+      name: nessusagent 
+      state: stopped
+      enabled: no
+
+  when: not nessus_enabled and not nessus_remove

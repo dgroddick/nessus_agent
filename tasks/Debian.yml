@@ -1,0 +1,16 @@
+---
+- assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+
+#- name: Copy Nessus package to Debian server
+#  copy:
+#    src: "files/{{ deb_agent_file }}"
+#    dest: "/tmp/{{ deb_agent_file }}"
+#  become: yes
+
+- name: Install Nessus Agent
+  apt:
+    deb: "NessusAgent"
+    state: present
+  become: yes

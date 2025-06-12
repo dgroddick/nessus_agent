@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  author: David Roddick
+  description: Nessus agent installation and configuration on RedHat/Ubuntu Linux
+  company: 
+  licence: BSD
+  min_ansible_version: 2.7.4
+  platforms:
+    - name: RedHat
+      versions:
+        - 6
+        - 7
+    - name: CentOS
+      versions:
+        - 6
+        - 7
+    - name: OracleLinux
+      versions:
+        - 6
+        - 7
+    - name: Ubuntu
+      versions:
+        - xenial
+
+  galaxy_tags:
+    - security
+    - Nessus
+    - Tenable

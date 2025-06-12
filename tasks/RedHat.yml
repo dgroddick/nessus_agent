@@ -1,0 +1,12 @@
+---
+- assert:
+    that:
+      - ansible_facts['os_family'] == 'RedHat'
+      - ansible_facts['distribution_major_version']|int in [6,7,8]
+
+- name: Install Nessus Agent
+  yum:
+    name: "NessusAgent"
+    state: present
+  notify:
+  - Start nessus

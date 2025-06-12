@@ -1,0 +1,10 @@
+---
+- name: Restart nessus
+  service: 
+    name: nessusagent
+    state: restarted
+  
+- name: Start nessus
+  service: 
+    name: nessusagent
+    state: started
